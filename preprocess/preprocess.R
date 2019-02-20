@@ -1,17 +1,21 @@
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+path = '/Users/davide/Documents/universita/tesi/src/preprocess'
+setwd(path)
+
 library(magrittr)
 source('utils.R')
 
 # load data
 load('../../data/dati_HF_sample.RData')
-df = bla
+df = data.frame(bla)
 rm(bla)
 
 # parameters
 verbose = TRUE
 max_date_first_discharge = '2011-12-31'
 months_follow_up = 12
+day_max = 366
 
 # clean
 df = df %>%
@@ -25,13 +29,12 @@ sel_df = df %>%
   keep_patients_survived_minimum_period(months_follow_up,verbose) %>%
   keep_only_follow_up_events(months_follow_up,verbose)
 
+# add relative time
+sel_df = add_relative_time(sel_df)
 
-# have a look at some patients
-library(ggplot2)
-selected_patient = sample(unique(sel_df$COD_REG),5)
-tmp = sel_df[sel_df$COD_REG %in% selected_patient,]
-ggplot(tmp) + geom_line(aes(x=data_prest, y=qt_prest_Sum, color=factor(COD_REG)))
-
+# compute counting processes
+processes = compute_counting_processes(sel_df,day_max,months_follow_up)
+melted_processes = melt_process_patient(processes)
 
 
 
