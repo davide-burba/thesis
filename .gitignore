@@ -1,0 +1,13 @@
+*.h5
+*.RData
+*.Rhistory
+*.p
+*.csv
+*.pickle
+.DS_Store
+*.xlsx
+
+__pycache*
+*.swp
+*.swo
+.ipynb_che*
