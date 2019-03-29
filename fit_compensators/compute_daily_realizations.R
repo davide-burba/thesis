@@ -1,12 +1,7 @@
 
-path = '/Users/davide/Documents/universita/tesi/src/pharmacological_counting_process'
-setwd(path)
-load('../../data/preprocessed_data.RData')
-
-# NB: this script defines the function, runs it and stores the dataframe
 
 # compute dataframe of daily realizations in long format 
-compute_daily_realizations = function(sel_df,times){
+compute_daily_realizations = function(sel_df,times = c(0:365)){
   patient_ids = unique(sel_df$id)
   
   daily_realizations = NULL
@@ -27,7 +22,3 @@ compute_daily_realizations = function(sel_df,times){
   return(daily_realizations)
 }  
 
-
-# compute the dataframe and save it
-daily_realizations = compute_daily_realizations(sel_df,times = c(0:365))
-save(daily_realizations, file = '../../data/daily_realizations.RData')
