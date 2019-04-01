@@ -4,27 +4,21 @@ require(lubridate)
 
 #' Select rows with events of desired type.
 keep_only_type_events = function(df, type_event, verbose = FALSE){
-  if(type_event == 'pharmacological'){ 
-    sel_df = df[which(df$tipo_prest == 30),]
+  if(type_event == 'ACE'){ 
+    indexes = sort(c(grep('C09A', df$class_prest),grep('C09B', df$class_prest) ))
+    sel_df = df[indexes,]
+  }else if(type_event == 'ATC_beta_blockers'){
+    indexes = c(grep('C07', df$class_prest))
+    sel_df = df[indexes,]
+  }else if('ATC_anti_aldosteronics'){
+    indexes = sort(c(grep('C03D', df$class_prest),grep('C03E', df$class_prest) ))
+    sel_df = df[indexes,]
   }else if(type_event == 'hospitalization'){
-    sel_df = df[which(df$tipo_prest == 41),]# TMP!!!! check!!!!
+    sel_df = df[which(df$tipo_prest == 41),]
   }
   
   if(verbose){
     print(paste('keep_only_type_events: selected',dim(sel_df)[1],'rows out of',dim(df)[1]))
-  }
-  return(sel_df)
-}
-
-
-#' Select rows relative to desired class_prest:
-keep_only_class_events = function(df, class_event, verbose = FALSE){
-  if(class_event == 'ACE_drugs'){ 
-    indexes = sort(c(grep('C09A', df$class_prest),grep('C09B', df$class_prest) ))
-    sel_df = df[indexes,]
-  }
-  if(verbose){
-    print(paste('keep_only_class_events: selected',dim(sel_df)[1],'rows out of',dim(df)[1]))
   }
   return(sel_df)
 }

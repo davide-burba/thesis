@@ -40,21 +40,16 @@ sel_df = df %>%
 
 
 if(verbose){print('*********************** Preprocessing ACE dataset ***********************')}
-### ACE drugs: select events
-# Select pharmacological events
-# Select only ACE DRUGS
+### ACE drugs: select events and prepare dataset
+# Select ACE DRUGS pharmacological events
 # Keep only follow-up events
-ACE_df = sel_df %>% 
-  keep_only_type_events('pharmacological',verbose) %>%  # In this case this step is useless (included in next one)
-  keep_only_class_events('ACE_drugs',verbose) %>%
-  keep_only_follow_up_events(months_follow_up,verbose)
-  
-### ACE drugs: prepare dataset
 # Group togheter the concurrent events for same patient (0.9% of the cases,  MPR i.e. consider sum of qt_prest_sum)
 # Add censoring due to follow-up (status=1 means uncensored)
 # Reformat dataset in format as requested by survival::coxph (new columns: start,stop,Nm,sum_past_qt_prest)
 # Include selected patients which did not have ACE events in the follow-up (only one censored observation)
-ACE_df = ACE_df %>%
+ACE_df = sel_df %>% 
+  keep_only_type_events('ACE',verbose) %>%  
+  keep_only_follow_up_events(months_follow_up,verbose) %>%
   set_mark_and_variables(ACE_mark,ACE_constant_variables) %>%
   group_concurrent_events(sum,verbose) %>%
   add_censored_observations(verbose) %>%
@@ -66,6 +61,35 @@ if(verbose){
   print(head(ACE_df))
 }
 
+
+if(verbose){print('*********************** Preprocessing beta dataset ***********************')}
+### beta drugs: select events and prepare dataset
+# Select beta DRUGS pharmacological events
+# Keep only follow-up events
+# Group togheter the concurrent events for same patient (0.9% of the cases,  MPR i.e. consider sum of qt_prest_sum)
+# Add censoring due to follow-up (status=1 means uncensored)
+# Reformat dataset in format as requested by survival::coxph (new columns: start,stop,Nm,sum_past_qt_prest)
+# Include selected patients which did not have beta events in the follow-up (only one censored observation)
+beta_df = sel_df %>% 
+  keep_only_type_events('ATC_beta_blockers',verbose) %>%  
+  keep_only_follow_up_events(months_follow_up,verbose) %>%
+  set_mark_and_variables(beta_mark,beta_constant_variables) %>%
+  group_concurrent_events(sum,verbose) %>%
+  add_censored_observations(verbose) %>%
+  reformat_dataset(verbose) %>%
+  include_patients_without_events(sel_df,beta_constant_variables,verbose) # NB: check if it's correct to do it! Not done in previous version
+
+if(verbose){
+  print('Head preprocessed dataset:')
+  print(head(beta_df))
+}
+
+#
 # save 
 save(ACE_df, file = '../../data/preprocessed_data_ACE.RData')
+save(beta_df, file = '../../data/preprocessed_data_beta.RData')
+
+
+
+
 
