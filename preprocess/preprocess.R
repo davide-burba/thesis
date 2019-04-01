@@ -67,6 +67,5 @@ if(verbose){
 }
 
 # save 
-#write.csv(sel_df,file = '../../data/preprocessed_data_2.csv',row.names = FALSE)
-save(ACE_df, file = '../../data/preprocessed_data_ACE_2.RData')
+save(ACE_df, file = '../../data/preprocessed_data_ACE.RData')
 
