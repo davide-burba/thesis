@@ -40,12 +40,19 @@ add_time_from_first_discharge = function(df,verbose = FALSE){
 
 
 #' Change name mark column to 'mark' (so we can easily use the same code for different marks) and select features
-set_mark_and_variables = function(events_df,mark,constant_variables){
+set_mark_and_variables = function(events_df,mark,constant_variables, fill_NA = FALSE){
   setnames(events_df, 
            old = mark, 
            new = 'mark')
   variables = c('id','time_event','mark',constant_variables)
   events_df = events_df[,..variables]
+  if(fill_NA){
+    # fill NA marks with median
+    indexes = is.na(events_df$mark)
+    value = median(events_df$mark,na.rm = TRUE)
+    events_df[indexes,'mark'] = value
+    print(paste('Filled',round(sum(indexes)/dim(events_df)[1]*100,3),'% NAs in mark with median = ',value))
+  }
   return(events_df)
 }
 

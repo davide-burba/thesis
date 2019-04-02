@@ -42,7 +42,7 @@ sel_df = df %>%
   add_time_from_first_discharge(verbose)
 
 
-if(verbose){print('*********************** Preprocessing ACE dataset ***********************')}
+if(verbose){cat('\n');print('*********************** Preprocessing ACE dataset ***********************')}
 ### ACE drugs: select events and prepare dataset
 # Select ACE DRUGS pharmacological events
 # Keep only follow-up events
@@ -53,19 +53,14 @@ if(verbose){print('*********************** Preprocessing ACE dataset ***********
 ACE_df = sel_df %>% 
   keep_only_type_events('ACE',verbose) %>%  
   keep_only_follow_up_events(months_follow_up,verbose) %>%
-  set_mark_and_variables(ACE_mark,ACE_constant_variables) %>%
+  set_mark_and_variables(ACE_mark,ACE_constant_variables, fill_NA = TRUE) %>%
   group_concurrent_events(sum,verbose) %>%
   add_censored_observations(verbose) %>%
   reformat_dataset(verbose) %>%
   include_patients_without_events(sel_df,ACE_constant_variables,verbose)
 
-if(verbose){
-  print('Head preprocessed dataset:')
-  print(head(ACE_df))
-}
 
-
-if(verbose){print('*********************** Preprocessing beta dataset ***********************')}
+if(verbose){cat('\n');print('*********************** Preprocessing beta dataset ***********************')}
 ### beta drugs: select events and prepare dataset
 # Select beta DRUGS pharmacological events
 # Keep only follow-up events
@@ -76,19 +71,14 @@ if(verbose){print('*********************** Preprocessing beta dataset **********
 beta_df = sel_df %>% 
   keep_only_type_events('ATC_beta_blockers',verbose) %>%  
   keep_only_follow_up_events(months_follow_up,verbose) %>%
-  set_mark_and_variables(beta_mark,beta_constant_variables) %>%
+  set_mark_and_variables(beta_mark,beta_constant_variables, fill_NA = TRUE) %>%
   group_concurrent_events(sum,verbose) %>%
   add_censored_observations(verbose) %>%
   reformat_dataset(verbose) %>%
   include_patients_without_events(sel_df,beta_constant_variables,verbose)
 
-if(verbose){
-  print('Head preprocessed dataset:')
-  print(head(beta_df))
-}
 
-
-if(verbose){print('*********************** Preprocessing aldosteronics dataset ***********************')}
+if(verbose){cat('\n');print('*********************** Preprocessing aldosteronics dataset ***********************')}
 ### aldosteronics drugs: select events and prepare dataset
 # Select aldosteronics DRUGS pharmacological events
 # Keep only follow-up events
@@ -99,14 +89,14 @@ if(verbose){print('*********************** Preprocessing aldosteronics dataset *
 aldosteronics_df = sel_df %>% 
   keep_only_type_events('ATC_aldosteronics_blockers',verbose) %>%  
   keep_only_follow_up_events(months_follow_up,verbose) %>%
-  set_mark_and_variables(aldosteronics_mark,aldosteronics_constant_variables) %>%
+  set_mark_and_variables(aldosteronics_mark,aldosteronics_constant_variables, fill_NA = TRUE) %>%
   group_concurrent_events(sum,verbose) %>%
   add_censored_observations(verbose) %>%
   reformat_dataset(verbose) %>%
   include_patients_without_events(sel_df,aldosteronics_constant_variables,verbose)
 
 
-if(verbose){print('*********************** Preprocessing hospitalisation dataset ***********************')}
+if(verbose){cat('\n');print('*********************** Preprocessing hospitalisation dataset ***********************')}
 ### hospitalisation times: select events and prepare dataset
 # Select hospitalisation  events
 # Keep only follow-up events (all patients have event at time 0, we drop it)
@@ -117,8 +107,8 @@ if(verbose){print('*********************** Preprocessing hospitalisation dataset
 hospitalisation_df = sel_df %>% 
   keep_only_type_events('hospitalisation',verbose) %>%  
   keep_only_follow_up_events(months_follow_up,verbose, drop_events_time_0 = TRUE) %>%
-  set_mark_and_variables(hospitalisation_mark,hospitalisation_constant_variables) %>%
-  group_concurrent_events(sum,verbose) %>%
+  set_mark_and_variables(hospitalisation_mark,hospitalisation_constant_variables, fill_NA = TRUE) %>%
+  group_concurrent_events(max,verbose) %>%
   add_censored_observations(verbose) %>%
   reformat_dataset(verbose) %>%
   include_patients_without_events(sel_df,hospitalisation_constant_variables,verbose)
