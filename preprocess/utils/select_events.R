@@ -3,37 +3,41 @@ require(lubridate)
 
 
 #' Select rows with events of desired type.
-keep_only_type_events = function(df, type_event, verbose = FALSE){
+keep_only_type_events = function(sel_df, type_event, verbose = FALSE){
   if(type_event == 'ACE'){ 
-    indexes = sort(c(grep('C09A', df$class_prest),grep('C09B', df$class_prest) ))
-    sel_df = df[indexes,]
+    indexes = sort(c(grep('C09A', sel_df$class_prest),grep('C09B', sel_df$class_prest) ))
+    events_df = sel_df[indexes,]
   }else if(type_event == 'ATC_beta_blockers'){
-    indexes = c(grep('C07', df$class_prest))
-    sel_df = df[indexes,]
+    indexes = c(grep('C07', sel_df$class_prest))
+    events_df = sel_df[indexes,]
   }else if(type_event == 'ATC_anti_aldosteronics'){
-    indexes = sort(c(grep('C03D', df$class_prest),grep('C03E', df$class_prest) ))
+    indexes = sort(c(grep('C03D', sel_df$class_prest),grep('C03E', sel_df$class_prest) ))
+    events_df = sel_df[indexes,]
   }else if(type_event == 'hospitalisation'){
-    sel_df = df[which(df$tipo_prest == 41),]
+    events_df = sel_df[which(sel_df$tipo_prest == 41),]
+  }else{
+    print('Unknown type_event')
+    return(NULL)
   }
   
   if(verbose){
-    print(paste('keep_only_type_events: selected',dim(sel_df)[1],'rows out of',dim(df)[1]))
+    print(paste('keep_only_type_events: selected',dim(events_df)[1],'rows out of',dim(sel_df)[1]))
   }
-  return(sel_df)
+  return(events_df)
 }
 
 
 #' Keep only events in follow-up period
-keep_only_follow_up_events = function(df,months_follow_up = 12, verbose = FALSE, drop_events_time_0 = FALSE){
-  start_follow_up = df$data_rif_ev
+keep_only_follow_up_events = function(sel_df,months_follow_up = 12, verbose = FALSE, drop_events_time_0 = FALSE){
+  start_follow_up = sel_df$data_rif_ev
   end_follow_up = start_follow_up %m+% months(months_follow_up)
-  sel_df = df[which(df$data_prest<end_follow_up),] # there are no-events before start_follow_up
+  events_df = sel_df[which(sel_df$data_prest<end_follow_up),] # there are no-events before start_follow_up
   if(drop_events_time_0){
-    sel_df = sel_df[time_event > 0]
+    events_df = events_df[time_event > 0]
   }
   if(verbose){
-    print(paste('keep_only_follow_up_events: selected',dim(sel_df)[1],'rows out of',dim(df)[1],', (',length(unique(sel_df$id)),' patients)'))
+    print(paste('keep_only_follow_up_events: selected',dim(events_df)[1],'rows out of',dim(sel_df)[1],', (',length(unique(events_df$id)),' patients)'))
   }
-  return(sel_df)
+  return(events_df)
 }
 

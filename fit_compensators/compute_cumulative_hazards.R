@@ -53,7 +53,7 @@ compute_cumulative_hazard = function(model,sel_df,smoothed_baseline,times,verbos
     # treat apart interval [-0.5,0)
     ck = patient_coefficients[id == patient_id & tk < 0]$ck
     deltas = c(ck*Lambda0s_value[1])
-    # compute deltas for each day
+    # compute deltas for each day (speed of this loop could be easily improved)
     for(t in 1:max(times)){
       tmp = patient_coefficients[id == patient_id & tk < t]$ck
       ck = tmp[length(tmp)]

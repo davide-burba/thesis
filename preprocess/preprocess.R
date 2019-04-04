@@ -82,12 +82,12 @@ if(verbose){cat('\n');print('*********************** Preprocessing aldosteronics
 ### aldosteronics drugs: select events and prepare dataset
 # Select aldosteronics DRUGS pharmacological events
 # Keep only follow-up events
-# Group togheter the concurrent events for same patient (56.4% of the cases,consider sum of qt_prest_sum)
+# Group togheter the concurrent events for same patient (0.3% of the cases,consider sum of qt_prest_sum)
 # Add censoring due to follow-up (status=1 means uncensored)
 # Reformat dataset in format as requested by survival::coxph (new columns: start,stop,Nm,y)
 # Include selected patients which did not have aldosteronics events in the follow-up (only one censored observation)
 aldosteronics_df = sel_df %>% 
-  keep_only_type_events('ATC_aldosteronics_blockers',verbose) %>%  
+  keep_only_type_events('ATC_anti_aldosteronics',verbose) %>%  
   keep_only_follow_up_events(months_follow_up,verbose) %>%
   set_mark_and_variables(aldosteronics_mark,aldosteronics_constant_variables, fill_NA = TRUE) %>%
   group_concurrent_events(sum,verbose) %>%
