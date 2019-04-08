@@ -29,18 +29,31 @@ class DeepHit(nn.Module):
 class Surv_Loss(torch.nn.Module):
     '''Survival loss function
     '''
+    def __init__(self,sigma = 1e2, alpha = 1):
+        super(Surv_Loss,self).__init__()
+        self.sigma = sigma
+        self.alpha = alpha
+        
     def forward(self,y_pred,y,status):
-        totloss = 0
+        L1,L2  = 0,0
+        F1 = y_pred.cumsum(1)
+        
+        # compute L1
+        #for uncensored: log P(T=t|x)
+        L1 -= torch.log(y_pred.gather(1, y.view(-1,1))).reshape(-1).dot(status)
+        #for censored: log \sum P(T>t|x)
+        L1 -= torch.log(1-F1.gather(1, y.view(-1,1))).reshape(-1).dot(1-status)
+                
+        # compute L2
         for i in range(len(y)):
-            v = y[i]
-            k = status[i]
-            y_pred_i = y_pred[i,:]
-            if k.item() == 1:
-                totloss -= torch.log(y_pred_i[v])
-            else:
-                totloss -= torch.log(1-torch.sum(y_pred_i[:v]))
-        return totloss
-
+            if status[i] ==1:
+                mask = (y[i] < y) & (status ==1)
+                if sum(mask)>0:
+                    diff = F1[i,y[i]]-F1[mask,y[i]]
+                    L2 += self.alpha*torch.exp(-diff/self.sigma).sum()
+                    
+        loss = L1 + L2
+        return loss
 
 class ColumnarDataset(Dataset):
     '''Class to manage tabular dataset in pytorch framework
@@ -49,7 +62,7 @@ class ColumnarDataset(Dataset):
         self.dfconts = X
         self.conts = np.stack([c.values for n, c in self.dfconts.items()], axis=1).astype(np.float32)
         self.y = y.values
-        self.status = status.values
+        self.status = status.values.astype(np.float32)
 
     def __len__(self): return len(self.y)
 
