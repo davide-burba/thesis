@@ -58,6 +58,17 @@ new_df[,'hospitalisation_PC1' := score_hospitalisation$PC1]
 new_df[,'hospitalisation_PC2' := score_hospitalisation$PC2]
 
 
+# select 30% of data set for testing purpose
+set.seed(185)
+test_ids = sample(new_df$id,round(0.3*length(new_df$id)))
+print(paste('Selected',length(test_ids),'patiets for test set'))
+
+# split test/train
+test_df = new_df[id %in% test_ids]
+new_df = new_df[!id %in% test_ids]
+
 save(new_df, file = '../../data/main_process_preprocessed_data.RData')
+save(test_df, file = '../../data/main_process_preprocessed_data_test.RData')
 write.csv(new_df, file = '../../data/main_process_preprocessed_data.csv',row.names=FALSE)
+write.csv(test_df, file = '../../data/main_process_preprocessed_data_test.csv',row.names=FALSE)
 
