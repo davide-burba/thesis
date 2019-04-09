@@ -55,6 +55,7 @@ class Surv_Loss(torch.nn.Module):
         loss = L1 + L2
         return loss
 
+    
 class ColumnarDataset(Dataset):
     '''Class to manage tabular dataset in pytorch framework
     '''
@@ -69,7 +70,6 @@ class ColumnarDataset(Dataset):
     def __getitem__(self, idx):
         return [self.conts[idx], self.y[idx], self.status[idx]]
 
-    
     
 def compute_expected_survival_time(predictions,n_times,T_max):
     ''' Function to compute expected survival time for each patient from predictions
