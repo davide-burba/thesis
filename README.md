@@ -11,6 +11,6 @@ The scope of this thesis was to model the history of patients in the framework o
 ## Contents
 
 - *preprocess* : prepare the dataset to fit the stochastic processes representing the history of the patients.
-- *fit_compensator* :   build the compensators of the counting processes.
+- *fit_compensators* :   build the compensators of the counting processes.
 - *fpca*: summarise compensators through functional principal component analysis scores
-- *survival analysis*: build the dataset with fpca scores, fit and compare survival models (Cox, deepHit, DRSA)
+- *survival_process*: build the dataset with fpca scores, fit and compare survival models (Cox, deepHit, DRSA)
