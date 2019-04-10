@@ -33,17 +33,17 @@ class Surv_Loss(torch.nn.Module):
         super(Surv_Loss,self).__init__()
         self.sigma = sigma
         self.alpha = alpha
-        
+
     def forward(self,y_pred,y,status):
         L1,L2  = 0,0
         F1 = y_pred.cumsum(1)
-        
+
         # compute L1
         #for uncensored: log P(T=t|x)
         L1 -= torch.log(y_pred.gather(1, y.view(-1,1))).reshape(-1).dot(status)
         #for censored: log \sum P(T>t|x)
         L1 -= torch.log(1-F1.gather(1, y.view(-1,1))).reshape(-1).dot(1-status)
-                
+
         # compute L2
         for i in range(len(y)):
             if status[i] ==1:
@@ -51,11 +51,11 @@ class Surv_Loss(torch.nn.Module):
                 if sum(mask)>0:
                     diff = F1[i,y[i]]-F1[mask,y[i]]
                     L2 += self.alpha*torch.exp(-diff/self.sigma).sum()
-                    
+
         loss = L1 + L2
         return loss
 
-    
+
 class ColumnarDataset(Dataset):
     '''Class to manage tabular dataset in pytorch framework
     '''
@@ -69,18 +69,3 @@ class ColumnarDataset(Dataset):
 
     def __getitem__(self, idx):
         return [self.conts[idx], self.y[idx], self.status[idx]]
-
-    
-def compute_expected_survival_time(predictions,n_times,T_max):
-    ''' Function to compute expected survival time for each patient from predictions
-    '''
-    expected_survival_times = []
-    numpy_pred = predictions.detach().numpy()
-    for i in range(len(numpy_pred)):
-        pred_i = numpy_pred[i,:]
-        times = 0.5 + np.arange(len(pred_i))
-        # come back to original scale
-        times = times/n_times*T_max
-
-        expected_survival_times.append(np.dot(pred_i,times))
-    return np.array(expected_survival_times)
