@@ -17,14 +17,6 @@ keep_patients_survived_minimum_period = function(df, months_follow_up = 12, verb
 }
 
 
-#' Select patient with the first discharge before a specified date
-#keep_patients_first_discharge_before_date = function(df, max_date_first_discharge = '2011-12-31',verbose = FALSE){
-#  sel_df = df[which(df$data_rif_ev < max_date_first_discharge),]
-#  if(verbose){
-#    print(paste('keep_patients_first_discharge_before_date: selected',dim(sel_df)[1],'rows out of',dim(df)[1]))
-#  }
-#  return(sel_df)
-#}
 
 
 
