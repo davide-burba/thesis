@@ -67,3 +67,26 @@ class DRSA_Loss(torch.nn.Module):
         loss = self.alpha*Lz+(1-self.alpha)*Lc
 
         return loss
+
+    
+def reformat_dataset(x_in,times):
+    ''' Adds time feature, returns array with 3 dimensions: time,id,features
+    '''
+    x_out = []
+    for i in x_in.index:
+        tmp = np.repeat(x_in.loc[i,:].values.reshape(1,1,-1),len(times),axis = 0)
+        observation_i = np.concatenate([tmp,times], axis = 2)
+        x_out.append(observation_i)  
+    x_out = np.concatenate(x_out, axis = 1)
+    return x_out
+
+
+def get_survival_density(predictions):
+    '''compute survival time probabilities from hazards'''
+    survival_density = [predictions[:,0].reshape(-1,1)]
+    tmp = (1 - predictions).cumprod(1)
+    for j in np.arange(1,predictions.shape[1]):
+        if j > 0:
+            survival_density.append((predictions[:,j]*tmp[:,j-1]).reshape(-1,1))
+    survival_density = torch.cat(survival_density,dim = 1)
+    return survival_density
