@@ -47,7 +47,7 @@ class Surv_Loss(torch.nn.Module):
         # compute L2
         for i in range(len(y)):
             if status[i] ==1:
-                mask = (y[i] < y) & (status ==1)
+                mask = (y[i] < y) 
                 if sum(mask)>0:
                     diff = F1[i,y[i]]-F1[mask,y[i]]
                     L2 += self.alpha*torch.exp(-diff/self.sigma).sum()
