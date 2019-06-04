@@ -16,7 +16,8 @@ compute_daily_realizations = function(sel_df,times = c(0:365)){
       nt = nt[length(nt)]
       Nt = c(Nt,nt)
     }
-    daily_realizations = rbind(daily_realizations,data.frame(patient_id,time = times, Nt))
+    daily_realizations = rbind(daily_realizations,
+                               data.frame(patient_id,time = times, Nt))
   }
   cat("\n")
   return(daily_realizations)

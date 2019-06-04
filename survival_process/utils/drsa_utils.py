@@ -67,7 +67,7 @@ class DRSA_Loss(torch.nn.Module):
 
         return loss
 
-    
+
 def reformat_dataset(x_in,times):
     ''' Adds time feature, returns array with 3 dimensions: time,id,features
     '''
@@ -75,7 +75,7 @@ def reformat_dataset(x_in,times):
     for i in x_in.index:
         tmp = np.repeat(x_in.loc[i,:].values.reshape(1,1,-1),len(times),axis = 0)
         observation_i = np.concatenate([tmp,times], axis = 2)
-        x_out.append(observation_i)  
+        x_out.append(observation_i)
     x_out = np.concatenate(x_out, axis = 1)
     return x_out
 
