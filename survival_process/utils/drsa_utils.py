@@ -68,7 +68,6 @@ class DRSA_Loss(torch.nn.Module):
         L_censored = -torch.log(1-y_pred[1-mask]).cumsum(1).gather(1,y[1-mask].view(-1,1)).sum()
 
         Lc = L_uncensored +L_censored
-        #Lc = L_censored
 
         loss = self.alpha*Lz+(1-self.alpha)*Lc
 
