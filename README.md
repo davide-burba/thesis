@@ -3,9 +3,9 @@
 **Keywords:** *counting processes*, *functional data analysis*, *survival analysis*, *deep learning*
 
 
-This repository contains the code of the thesis: **Information extraction from counting processes: an application to survival time modelling**.
+This repository contains the code of the thesis: **Performing Survival Analysis via Functional Cox-type Regression and a Machine Learning approach: an application to Heart Failure patients**.
 
-The scope of this thesis was to model the history of patients in the framework of counting processes and to use this information in classical and state-of-the-art survival models.
+The goal of this thesis was to model the history of patients in the framework of counting processes, to use this information in classical and state-of-the-art survival models and to compare them.
 
 
 ## Contents
