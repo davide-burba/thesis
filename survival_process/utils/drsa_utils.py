@@ -22,15 +22,23 @@ class SequenceDataset(Dataset):
 class DRSA(nn.Module):
     '''DRSA network architecture
     '''
-    def __init__(self,n_features):
+    def __init__(self,n_features,dropout = 0.6):
         super(DRSA, self).__init__()
-        self.lstm = nn.LSTM(n_features, 10*n_features)
-        self.output = nn.Linear(10*n_features, 1)
-        self.droput = nn.Dropout(p=0.6)
+        self.hidden_dim = 10*n_features
+        self.lstm = nn.LSTM(n_features, self.hidden_dim)
+        self.output = nn.Linear(self.hidden_dim, 1)
+        self.droput = nn.Dropout(p=dropout)
+
+        # make initial values of hidden and cell state learnable
+        self.hidden = nn.Parameter(torch.zeros(1, 1, self.hidden_dim))
+        self.cell_state = nn.Parameter(torch.zeros(1, 1, self.hidden_dim))
 
     def forward(self, x):
-        x = self.droput(self.lstm(x)[0])
-        x = self.droput(self.output(x))
+        h0 = self.hidden.reshape(1,1,self.hidden_dim).expand(1,x.shape[1],self.hidden_dim)
+        c0 = self.cell_state.reshape(1,1,self.hidden_dim).expand(1,x.shape[1],self.hidden_dim)
+
+        x = self.droput(self.lstm(x,(h0,c0))[0])
+        x = self.output(x)
         x = torch.sigmoid(x)
         return x
 
@@ -49,12 +57,9 @@ class DRSA_Loss(torch.nn.Module):
         # compute logs and sum of (1-log)
         logs =  torch.log(y_pred[mask].gather(1,y[mask].view(-1,1)))
         # little trick for events happening at time 0, to avoid looking at index -1
-        tmp = y[mask]-1
-        tmp[tmp<0]=0
-        sum_one_minus_log = torch.log(1-y_pred[mask]).cumsum(1).gather(1,tmp.view(-1,1))
-        sum_one_minus_log[y[mask] < 1] = 0
-
-        Lz = -(logs + sum_one_minus_log).sum()
+        tmp = y[mask & (y != 0)]-1
+        sum_one_minus_log = torch.log(1-y_pred[mask & (y != 0)]).cumsum(1).gather(1,tmp.view(-1,1))
+        Lz = -(logs.sum() + sum_one_minus_log.sum())
 
         # Compute L_uncensored
         L_uncensored = -torch.log(1-(1-y_pred[mask]).cumprod(1).gather(1,y[mask].view(-1,1))).sum()
@@ -62,10 +67,13 @@ class DRSA_Loss(torch.nn.Module):
         # Compute L_censored
         L_censored = -torch.log(1-y_pred[1-mask]).cumsum(1).gather(1,y[1-mask].view(-1,1)).sum()
 
-        Lc = L_uncensored+L_censored
+        Lc = L_uncensored +L_censored
+        #Lc = L_censored
+
         loss = self.alpha*Lz+(1-self.alpha)*Lc
 
         return loss
+
 
 
 def reformat_dataset(x_in,times):
