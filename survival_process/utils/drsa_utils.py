@@ -24,20 +24,24 @@ class DRSA(nn.Module):
     '''
     def __init__(self,n_features,dropout = 0.6):
         super(DRSA, self).__init__()
+        self.n_features = n_features
         self.hidden_dim = 10*n_features
         self.lstm = nn.LSTM(n_features, self.hidden_dim)
         self.output = nn.Linear(self.hidden_dim, 1)
-        self.droput = nn.Dropout(p=dropout)
+        self.dropout = nn.Dropout(p=dropout)
 
-        # make initial values of hidden and cell state learnable
-        self.hidden = nn.Parameter(torch.zeros(1, 1, self.hidden_dim))
-        self.cell_state = nn.Parameter(torch.zeros(1, 1, self.hidden_dim))
+        # custom learnable initial values for h0 and c0
+        self.initialise_h0 = nn.Linear(self.n_features-1,self.hidden_dim)
+        self.initialise_c0 = nn.Linear(self.n_features-1,self.hidden_dim)
 
     def forward(self, x):
-        h0 = self.hidden.reshape(1,1,self.hidden_dim).expand(1,x.shape[1],self.hidden_dim)
-        c0 = self.cell_state.reshape(1,1,self.hidden_dim).expand(1,x.shape[1],self.hidden_dim)
-
-        x = self.droput(self.lstm(x,(h0,c0))[0])
+        # compute initial values hidden and cell vectors
+        h0 = torch.relu(self.initialise_h0(x[0,:,:self.n_features-1]).reshape(1,-1,self.hidden_dim))
+        c0 = torch.relu(self.initialise_c0(x[0,:,:self.n_features-1]).reshape(1,-1,self.hidden_dim))
+        h0 = self.dropout(h0)
+        c0 = self.dropout(c0)
+        # run model recurrently for the whole sequences
+        x = self.dropout(self.lstm(x,(h0,c0))[0])
         x = self.output(x)
         x = torch.sigmoid(x)
         return x
